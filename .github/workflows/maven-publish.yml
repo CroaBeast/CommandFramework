@@ -35,7 +35,7 @@ jobs:
 
     - name: Delete existing GitHub release (if exists)
       run: |
-        RELEASE_ID=$(gh release view v${{ env.VERSION }} --json id -q '.id' || echo "")
+        RELEASE_ID=$(gh release view ${{ env.VERSION }} --json id -q '.id' || echo "")
         if [ -n "$RELEASE_ID" ]; then
           echo "Deleting existing release..."
           gh release delete ${{ env.VERSION }} --yes
@@ -45,9 +45,9 @@ jobs:
 
     - name: Delete existing tag (if exists)
       run: |
-        if git rev-parse "v${{ env.VERSION }}" >/dev/null 2>&1; then
+        if git rev-parse "${{ env.VERSION }}" >/dev/null 2>&1; then
           echo "Deleting existing tag..."
-          git tag -d v${{ env.VERSION }}
+          git tag -d ${{ env.VERSION }}
           git push origin :refs/tags/${{ env.VERSION }}
         fi
       env:
@@ -61,8 +61,8 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v${{ env.VERSION }}
-        name: Release v${{ env.VERSION }}
+        tag_name: ${{ env.VERSION }}
+        name: Release ${{ env.VERSION }}
         draft: false
         prerelease: false
         files: |
