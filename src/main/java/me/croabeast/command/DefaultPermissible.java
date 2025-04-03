@@ -3,13 +3,11 @@ package me.croabeast.command;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
 
-import java.util.function.BiPredicate;
-
 /**
  * Represents a permissible action or command with a default implementation for permission checking.
  * <p>
  * {@code DefaultPermissible} extends the {@link Permissible} interface and provides a default
- * permission check using a {@link BiPredicate} as the checker. This default checker verifies that the
+ * permission check using a {@link SenderPredicate} as the checker. This default checker verifies that the
  * permission string is not blank and that the {@link CommandSender} has the specified permission.
  * </p>
  * <p>
@@ -39,10 +37,10 @@ public interface DefaultPermissible extends Permissible {
     /**
      * The default permission checker that verifies if a {@link CommandSender} has the specified permission.
      * <p>
-     * This {@code BiPredicate} checks that the permission string is not blank and that the sender has the permission.
+     * This {@link SenderPredicate} checks that the permission string is not blank and that the sender has the permission.
      * </p>
      */
-    BiPredicate<CommandSender, String> DEFAULT_CHECKER =
+    SenderPredicate<String> DEFAULT_CHECKER =
             (sender, permission) -> StringUtils.isBlank(permission) && sender.hasPermission(permission);
 
     /**

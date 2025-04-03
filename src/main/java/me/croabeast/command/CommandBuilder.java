@@ -42,7 +42,7 @@ import java.util.function.Supplier;
  * @see TabBuilder
  */
 @Getter
-public final class CommandBuilder extends BukkitCommand {
+public final class CommandBuilder {
 
     /**
      * Flag indicating whether this command is enabled.
@@ -66,6 +66,8 @@ public final class CommandBuilder extends BukkitCommand {
     @Getter(AccessLevel.NONE)
     private Supplier<TabBuilder> builder = null;
 
+    private final BukkitCommand command;
+
     /**
      * Constructs a new {@code CommandBuilder} with the specified plugin and command name.
      *
@@ -73,7 +75,39 @@ public final class CommandBuilder extends BukkitCommand {
      * @param name   the name of the command.
      */
     private CommandBuilder(Plugin plugin, String name) {
-        super(plugin, name);
+        command = new BukkitCommand(plugin, name) {
+            @Override
+            public boolean isEnabled() {
+                return enabled;
+            }
+
+            @Override
+            public boolean isOverriding() {
+                return overriding;
+            }
+
+            @Override
+            public @NotNull Supplier<Collection<String>> generateCompletions(CommandSender sender, String[] arguments) {
+                return () -> completions.apply(sender, arguments);
+            }
+
+            @Override
+            public TabBuilder getCompletionBuilder() {
+                return builder == null ? null : builder.get();
+            }
+
+            @Override
+            public boolean register() {
+                enabled = true;
+                return super.register();
+            }
+
+            @Override
+            public boolean unregister() {
+                enabled = false;
+                return super.unregister();
+            }
+        };
     }
 
     /**
@@ -146,82 +180,8 @@ public final class CommandBuilder extends BukkitCommand {
      */
     @NotNull
     public CommandBuilder apply(@NotNull Consumer<BukkitCommand> consumer) {
-        Objects.requireNonNull(consumer).accept(this);
+        Objects.requireNonNull(consumer).accept(command);
         return this;
-    }
-
-    /**
-     * Setting the command name is not supported.
-     *
-     * @param name the new name.
-     * @return never returns normally.
-     * @throws UnsupportedOperationException always thrown.
-     */
-    @Override
-    public boolean setName(@NotNull String name) {
-        throw new UnsupportedOperationException("Name can not be changed");
-    }
-
-    /**
-     * Setting the command label is not supported.
-     *
-     * @param label the new label.
-     * @return never returns normally.
-     * @throws UnsupportedOperationException always thrown.
-     */
-    @Override
-    public boolean setLabel(@NotNull String label) {
-        throw new UnsupportedOperationException("Label can not be changed");
-    }
-
-    /**
-     * Generates tab-completion suggestions.
-     * <p>
-     * This method uses the configured completions function to generate suggestions based on the sender and arguments.
-     * </p>
-     *
-     * @param sender the command sender.
-     * @param args   the command arguments.
-     * @return a supplier that provides a collection of suggestion strings.
-     */
-    @NotNull
-    public Supplier<Collection<String>> generateCompletions(CommandSender sender, String[] args) {
-        return () -> completions.apply(sender, args);
-    }
-
-    /**
-     * Retrieves the {@link TabBuilder} for advanced tab-completion configuration.
-     *
-     * @return the {@link TabBuilder} instance if set; {@code null} otherwise.
-     */
-    @Override
-    public TabBuilder getCompletionBuilder() {
-        return builder == null ? null : builder.get();
-    }
-
-    /**
-     * Ensures the command is enabled and then registers it.
-     * <p>
-     * If the command is disabled, it is enabled before registration.
-     * </p>
-     *
-     * @return {@code true} if registration was successful; {@code false} otherwise.
-     */
-    @Override
-    public boolean register() {
-        if (!enabled) enabled = true;
-        return super.register();
-    }
-
-    /**
-     * Unregisters the command and marks it as disabled.
-     *
-     * @return {@code true} if unregistration was successful; {@code false} otherwise.
-     */
-    @Override
-    public boolean unregister() {
-        if (enabled) enabled = false;
-        return super.unregister();
     }
 
     /**

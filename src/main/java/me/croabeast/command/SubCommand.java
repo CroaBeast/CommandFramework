@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.BiPredicate;
 
 /**
  * Represents a sub-command that is part of a parent command.
@@ -114,7 +113,7 @@ public class SubCommand implements BaseCommand {
      */
     @Override
     public boolean isPermitted(CommandSender sender, boolean log) {
-        final BiPredicate<CommandSender, String> checker = DefaultPermissible.DEFAULT_CHECKER;
+        final SenderPredicate<String> checker = DefaultPermissible.DEFAULT_CHECKER;
         return checker.test(sender, parent.getWildcardPermission()) || checker.test(sender, permission);
     }
 

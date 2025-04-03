@@ -5,7 +5,6 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-import java.util.function.BiPredicate;
 
 /**
  * Functional interface representing an executable command action.
@@ -15,13 +14,13 @@ import java.util.function.BiPredicate;
  * </p>
  * <p>
  * This interface also provides helper methods to convert an {@code Executable} into a standard Bukkit
- * {@link CommandExecutor} and to create an {@code Executable} from a {@link BiPredicate} or a constant boolean value.
+ * {@link CommandExecutor} and to create an {@code Executable} from a {@link SenderPredicate} or a constant boolean value.
  * </p>
  *
  * <p>
  * Example usage:
  * <pre><code>
- * // Create an executable command using a BiPredicate
+ * // Create an executable command using a SenderPredicate
  * Executable exec = Executable.from((sender, args) -&gt; sender.hasPermission("myplugin.command"));
  *
  * // Convert to a Bukkit CommandExecutor
@@ -60,18 +59,18 @@ public interface Executable {
     }
 
     /**
-     * Creates an {@code Executable} from the given {@link BiPredicate}.
+     * Creates an {@code Executable} from the given {@link CommandPredicate}.
      * <p>
      * The provided predicate will be used to determine the execution result. If the predicate test returns
      * {@code true}, the executable state is {@link State#TRUE}; otherwise, it is {@link State#FALSE}.
      * </p>
      *
-     * @param predicate a {@link BiPredicate} that tests a {@link CommandSender} and an array of arguments.
+     * @param predicate a {@link CommandPredicate} that tests a {@link CommandSender} and an array of arguments.
      * @return an {@code Executable} instance based on the provided predicate.
      * @throws NullPointerException if the predicate is {@code null}.
      */
     @NotNull
-    static Executable from(BiPredicate<CommandSender, String[]> predicate) {
+    static Executable from(CommandPredicate predicate) {
         Objects.requireNonNull(predicate);
         return (s, a) -> predicate.test(s, a) ? State.TRUE : State.FALSE;
     }

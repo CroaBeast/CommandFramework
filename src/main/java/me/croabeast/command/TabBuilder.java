@@ -7,7 +7,6 @@ import org.bukkit.permissions.Permissible;
 
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 /**
@@ -44,7 +43,7 @@ public final class TabBuilder {
      * By default, this predicate uses the {@code Permissible::hasPermission} method.
      * </p>
      */
-    private BiPredicate<CommandSender, String> permPredicate = Permissible::hasPermission;
+    private SenderPredicate<String> permPredicate = Permissible::hasPermission;
 
     /**
      * Retrieves the set of {@link Suggestion} instances stored for the given argument index.
@@ -64,7 +63,7 @@ public final class TabBuilder {
      * @return this {@code TabBuilder} instance for method chaining.
      * @throws NullPointerException if the predicate is {@code null}.
      */
-    public TabBuilder setPermissionPredicate(BiPredicate<CommandSender, String> predicate) {
+    public TabBuilder setPermissionPredicate(SenderPredicate<String> predicate) {
         permPredicate = Objects.requireNonNull(predicate);
         return this;
     }
@@ -72,7 +71,7 @@ public final class TabBuilder {
     /**
      * Adds a single argument suggestion to the builder at the specified index.
      * <p>
-     * This method associates a {@link BiPredicate} that checks conditions on the command sender and arguments,
+     * This method associates a {@link CommandPredicate} that checks conditions on the command sender and arguments,
      * and a {@link BiFunction} that generates a suggestion string.
      * </p>
      *
@@ -82,7 +81,7 @@ public final class TabBuilder {
      * @return this {@code TabBuilder} instance for chaining.
      * @throws NullPointerException if {@code predicate} or {@code arg} is {@code null}.
      */
-    private TabBuilder addArg0(int index, BiPredicate<CommandSender, String[]> predicate, BiFunction<CommandSender, String[], String> arg) {
+    private TabBuilder addArg0(int index, CommandPredicate predicate, BiFunction<CommandSender, String[], String> arg) {
         Objects.requireNonNull(predicate);
         Objects.requireNonNull(arg);
         Set<Suggestion<?>> args = fromIndex(index);
@@ -108,7 +107,7 @@ public final class TabBuilder {
      * @return this {@code TabBuilder} instance for chaining.
      * @throws NullPointerException if {@code predicate} or {@code arg} is {@code null}.
      */
-    private TabBuilder addCollectionArg0(int index, BiPredicate<CommandSender, String[]> predicate, BiFunction<CommandSender, String[], Collection<String>> arg) {
+    private TabBuilder addCollectionArg0(int index, CommandPredicate predicate, BiFunction<CommandSender, String[], Collection<String>> arg) {
         Objects.requireNonNull(predicate);
         Objects.requireNonNull(arg);
         Set<Suggestion<?>> args = fromIndex(index);
@@ -130,7 +129,7 @@ public final class TabBuilder {
      * @param argument  the function to generate the suggestion.
      * @return this {@code TabBuilder} instance for chaining.
      */
-    public TabBuilder addArgument(int index, BiPredicate<CommandSender, String[]> predicate, BiFunction<CommandSender, String[], String> argument) {
+    public TabBuilder addArgument(int index, CommandPredicate predicate, BiFunction<CommandSender, String[], String> argument) {
         return addArg0(index, predicate, argument);
     }
 
@@ -142,7 +141,7 @@ public final class TabBuilder {
      * @param argument  the constant suggestion string.
      * @return this {@code TabBuilder} instance for chaining.
      */
-    public TabBuilder addArgument(int index, BiPredicate<CommandSender, String[]> predicate, String argument) {
+    public TabBuilder addArgument(int index, CommandPredicate predicate, String argument) {
         return addArg0(index, predicate, (s, a) -> argument);
     }
 
@@ -200,7 +199,7 @@ public final class TabBuilder {
      * @param function  the function that produces a collection of suggestion strings.
      * @return this {@code TabBuilder} instance for chaining.
      */
-    public TabBuilder addArguments(int index, BiPredicate<CommandSender, String[]> predicate, BiFunction<CommandSender, String[], Collection<String>> function) {
+    public TabBuilder addArguments(int index, CommandPredicate predicate, BiFunction<CommandSender, String[], Collection<String>> function) {
         return addCollectionArg0(index, predicate, function);
     }
 
@@ -212,7 +211,7 @@ public final class TabBuilder {
      * @param arguments a collection of suggestion strings.
      * @return this {@code TabBuilder} instance for chaining.
      */
-    public TabBuilder addArguments(int index, BiPredicate<CommandSender, String[]> predicate, Collection<String> arguments) {
+    public TabBuilder addArguments(int index, CommandPredicate predicate, Collection<String> arguments) {
         return addCollectionArg0(index, predicate, (s, a) -> Objects.requireNonNull(arguments));
     }
 
@@ -224,7 +223,7 @@ public final class TabBuilder {
      * @param arguments an array of suggestion strings.
      * @return this {@code TabBuilder} instance for chaining.
      */
-    public TabBuilder addArguments(int index, BiPredicate<CommandSender, String[]> predicate, String... arguments) {
+    public TabBuilder addArguments(int index, CommandPredicate predicate, String... arguments) {
         return addArguments(index, predicate, Arrays.asList(arguments));
     }
 
@@ -286,17 +285,19 @@ public final class TabBuilder {
     public List<String> build(CommandSender sender, String[] args) {
         List<String> list = new LinkedList<>();
 
-        fromIndex(args.length - 1).stream()
+        fromIndex(args.length - 1)
+                .stream()
                 .filter(o -> o.predicate.test(sender, args))
                 .forEach(o -> {
-                    if (String.class == o.getType()) {
-                        list.add((String) o.function.apply(sender, args));
+                    if (Objects.equals(String.class, o.getType()))
+                    {
+                        list.add((String)
+                                o.function.apply(sender, args));
                         return;
                     }
 
-                    list.addAll(((Collection<String>) o
-                            .function
-                            .apply(sender, args)));
+                    list.addAll(((Collection<String>)
+                            o.function.apply(sender, args)));
                 });
 
         final String t = args[args.length - 1];
@@ -316,10 +317,8 @@ public final class TabBuilder {
      */
     @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
     private static abstract class Suggestion<T> {
-
-        final BiPredicate<CommandSender, String[]> predicate;
+        final CommandPredicate predicate;
         final BiFunction<CommandSender, String[], T> function;
-
         abstract Class<T> getType();
     }
 }
