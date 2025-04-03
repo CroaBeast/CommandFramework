@@ -38,7 +38,7 @@ jobs:
         RELEASE_ID=$(gh release view v${{ env.VERSION }} --json id -q '.id' || echo "")
         if [ -n "$RELEASE_ID" ]; then
           echo "Deleting existing release..."
-          gh release delete v${{ env.VERSION }} --yes
+          gh release delete ${{ env.VERSION }} --yes
         fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -48,7 +48,7 @@ jobs:
         if git rev-parse "v${{ env.VERSION }}" >/dev/null 2>&1; then
           echo "Deleting existing tag..."
           git tag -d v${{ env.VERSION }}
-          git push origin :refs/tags/v${{ env.VERSION }}
+          git push origin :refs/tags/${{ env.VERSION }}
         fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
