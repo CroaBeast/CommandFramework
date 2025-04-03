@@ -78,26 +78,20 @@ public class SubCommand implements BaseCommand {
      * </p>
      *
      * @param parent the parent command (must not be {@code null}).
-     * @param name   the sub-command name, optionally including aliases separated by a semicolon.
+     * @param aliases   the sub-command name, optionally including aliases separated by a semicolon.
      * @throws NullPointerException if the parent is {@code null} or if the name is blank.
      */
-    public SubCommand(Command parent, String name) {
+    public SubCommand(Command parent, String name, String... aliases) {
         this.parent = Objects.requireNonNull(parent, "Parent cannot be null");
 
         if (StringUtils.isBlank(name))
             throw new NullPointerException("Name is empty");
-
+        
         // Split the provided name string by semicolons to extract primary name and aliases.
-        List<String> list = new ArrayList<>(Arrays.asList(name.split(";")));
-        this.name = list.get(0);
+        List<String> list = Arrays.asList(aliases);
+        this.name = name;
         this.permission = parent.getPermission() + '.' + this.name;
-
-        // Add any aliases if provided.
-        if (list.size() > 1) {
-            for (int i = 1; i < list.size(); i++) {
-                aliases.add(list.get(i));
-            }
-        }
+        this.aliases.addAll(list);
     }
 
     /**
