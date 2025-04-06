@@ -1,6 +1,6 @@
-# CommandFramework
+# Command Framework
 
-CommandFramework is a flexible and extensible command framework designed for Bukkit/Spigot and especially Paper forks. It simplifies the process of creating, registering, and managing commands dynamically at runtime—a task that can be challenging due to inherent differences and limitations between Bukkit/Spigot and Paper.
+Command Framework is a flexible and extensible command framework designed for Bukkit/Spigot and especially Paper forks. It simplifies the process of creating, registering, and managing commands dynamically at runtime—a task that can be challenging due to inherent differences and limitations between Bukkit/Spigot and Paper.
 
 ---
 
@@ -9,7 +9,7 @@ CommandFramework is a flexible and extensible command framework designed for Buk
 The `me.croabeast.command` package offers a modular command system that provides:
 
 - **Robust Registration/Unregistration:**  
-  Seamlessly register and unregister commands at runtime even on Paper servers, where many traditional Bukkit/Spigot implementations can break. CommandFramework addresses the runtime registration challenges posed by Paper.
+  Seamlessly register and unregister commands at runtime even on Paper servers, where many traditional Bukkit/Spigot implementations can break. Command Framework addresses the runtime registration challenges posed by Paper.
 
 - **Sub-Commands Support:**  
   Easily implement command hierarchies with sub-commands. Each sub-command automatically derives its permission node from its parent and can be configured with aliases.
@@ -24,7 +24,7 @@ The `me.croabeast.command` package offers a modular command system that provides
   Use the `CommandBuilder` class for a fluent API to quickly create and configure commands, setting properties like overriding behavior, error handling, and custom tab completion strategies.
 
 - **Integration with Bukkit/Spigot/Paper:**  
-  Built on top of Bukkit’s command system, CommandFramework seamlessly integrates with the server’s command map and permission system. It is particularly tuned for Paper servers where runtime command management is notoriously challenging.
+  Built on top of Bukkit’s command system, Command Framework seamlessly integrates with the server’s command map and permission system. It is particularly tuned for Paper servers where runtime command management is notoriously challenging.
 
 ---
 
@@ -64,9 +64,9 @@ The `me.croabeast.command` package offers a modular command system that provides
 
 ---
 
-## Why CommandFramework Works on Paper Forks
+## Why Command Framework Works on Paper Forks
 
-Paper forks of Bukkit/Spigot often break traditional command registration methods, especially when attempting dynamic registration and unregistration at runtime. CommandFramework was built with these challenges in mind. It:
+Paper forks of Bukkit/Spigot often break traditional command registration methods, especially when attempting dynamic registration and unregistration at runtime. Command Framework was built with these challenges in mind. It:
 
 - **Supports Runtime Changes:**  
   Enables commands to be registered and unregistered at runtime without issues on Paper.
@@ -218,9 +218,9 @@ public class MyPlugin extends JavaPlugin {
 
 ## Conclusion
 
-**CommandFramework** (the collection of classes in the `me.croabeast.command` package) is designed to streamline command development for Minecraft plugins, particularly on Paper forks where runtime registration can be challenging. Its modular design, support for sub-commands, dynamic tab completion, and robust permission checks make it an ideal choice for modern plugin development.
+**Command Framework** (the collection of classes in the `me.croabeast.command` package) is designed to streamline command development for Minecraft plugins, particularly on Paper forks where runtime registration can be challenging. Its modular design, support for sub-commands, dynamic tab completion, and robust permission checks make it an ideal choice for modern plugin development.
 
-With CommandFramework, you can build sophisticated command hierarchies, provide context-sensitive tab completions, and manage command registration and unregistration at runtime—ensuring compatibility and stability even on the latest Paper servers.
+With Command Framework, you can build sophisticated command hierarchies, provide context-sensitive tab completions, and manage command registration and unregistration at runtime—ensuring compatibility and stability even on the latest Paper servers.
 
-Happy coding and enjoy building powerful commands with CommandFramework!  
+Happy coding and enjoy building powerful commands with Command Framework!  
 — *CroaBeast*  
