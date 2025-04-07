@@ -1,5 +1,6 @@
 package me.croabeast.command;
 
+import me.croabeast.common.Registrable;
 import org.bukkit.Keyed;
 import org.bukkit.command.PluginIdentifiableCommand;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +18,7 @@ import java.util.Set;
  *   <li>{@link BaseCommand} for basic command properties (name, aliases, and executable action).</li>
  *   <li>{@link Completable} for generating tab-completion suggestions.</li>
  *   <li>{@link PluginIdentifiableCommand} and {@link Keyed} for associating the command with a plugin.</li>
+ *   <li>{@link Registrable} for handling command registration.</li>
  * </ul>
  * </p>
  * <p>
@@ -74,8 +76,9 @@ import java.util.Set;
  * @see Completable
  * @see PluginIdentifiableCommand
  * @see Keyed
+ * @see Registrable
  */
-public interface Command extends BaseCommand, Completable, PluginIdentifiableCommand, Keyed {
+public interface Command extends BaseCommand, Completable, PluginIdentifiableCommand, Keyed, Registrable {
 
     /**
      * Checks if the command is currently enabled.
@@ -90,12 +93,6 @@ public interface Command extends BaseCommand, Completable, PluginIdentifiableCom
      * @return {@code true} if the command is overriding; {@code false} otherwise.
      */
     boolean isOverriding();
-
-    boolean isRegistered();
-
-    boolean register();
-
-    boolean unregister();
 
     /**
      * Retrieves the set of sub-commands associated with this command.

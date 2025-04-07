@@ -117,11 +117,14 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
          */
         private Entry(org.bukkit.command.@NotNull Command command) {
             this.command = command;
-            this.plugin = fromCommand(command);
+            this.plugin = command instanceof PluginIdentifiableCommand ?
+                    ((PluginIdentifiableCommand) command).getPlugin() : null;
+
             if (plugin != null) {
                 fallbackPrefix = pluginName(plugin);
                 return;
             }
+
             Set<String> names = new HashSet<>();
             knownCommands().forEach((k, v) -> {
                 if (command.equals(v)) names.add(k);
@@ -131,17 +134,6 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
                 if (name.contains(":"))
                     prefix = name.split(":")[0];
             fallbackPrefix = prefix;
-        }
-
-        /**
-         * Retrieves the plugin associated with the command.
-         *
-         * @param command the command instance.
-         * @return the plugin if the command implements {@link PluginIdentifiableCommand}; {@code null} otherwise.
-         */
-        static Plugin fromCommand(org.bukkit.command.Command command) {
-            return command instanceof PluginIdentifiableCommand ?
-                    ((PluginIdentifiableCommand) command).getPlugin() : null;
         }
 
         /**
@@ -514,6 +506,20 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
         method.invoke(server);
     }
 
+    public boolean register(boolean sync) {
+        if (registered || !isEnabled()) return false;
+
+        org.bukkit.command.Command c = knownCommands().get(getName());
+        if (isOverriding() && c != null)
+            (loadedCommand = new Entry(c)).unregister();
+
+        loadCommandPermissions(true);
+        getMap().register(Entry.pluginName(plugin), this);
+
+        if (sync) syncCommands();
+        return registered = true;
+    }
+
     /**
      * Registers this command with the Bukkit command map.
      * <p>
@@ -526,30 +532,11 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
      */
     @Override
     public boolean register() {
-        if (registered || !isEnabled()) return false;
-
-        org.bukkit.command.Command c = knownCommands().get(getName());
-        if (isOverriding() && c != null)
-            (loadedCommand = new Entry(c)).unregister();
-
-        loadCommandPermissions(true);
-        getMap().register(Entry.pluginName(plugin), this);
-
-        syncCommands();
-        return registered = true;
+        return register(true);
     }
 
-    /**
-     * Unregisters this command from the Bukkit command map.
-     * <p>
-     * If a previous command was overridden, it is re-registered after this command is unregistered.
-     * </p>
-     *
-     * @return {@code true} if the command was successfully unregistered; {@code false} otherwise.
-     */
     @SuppressWarnings("all")
-    @Override
-    public boolean unregister() {
+    public boolean unregister(boolean sync) {
         if (!registered || isEnabled()) return false;
 
         org.bukkit.command.Command c = knownCommands().get(getName());
@@ -565,8 +552,21 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
             loadedCommand = null;
         }
 
-        syncCommands();
+        if (sync) syncCommands();
         return !(registered = false);
+    }
+
+    /**
+     * Unregisters this command from the Bukkit command map.
+     * <p>
+     * If a previous command was overridden, it is re-registered after this command is unregistered.
+     * </p>
+     *
+     * @return {@code true} if the command was successfully unregistered; {@code false} otherwise.
+     */
+    @Override
+    public boolean unregister() {
+        return unregister(true);
     }
 
     /**
