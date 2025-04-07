@@ -78,7 +78,8 @@ public class SubCommand implements BaseCommand {
      * </p>
      *
      * @param parent the parent command (must not be {@code null}).
-     * @param aliases   the sub-command name, optionally including aliases separated by a semicolon.
+     * @param name   the sub-command name.
+     * @param aliases the optional aliases.
      * @throws NullPointerException if the parent is {@code null} or if the name is blank.
      */
     public SubCommand(Command parent, String name, String... aliases) {
@@ -86,12 +87,39 @@ public class SubCommand implements BaseCommand {
 
         if (StringUtils.isBlank(name))
             throw new NullPointerException("Name is empty");
-        
-        // Split the provided name string by semicolons to extract primary name and aliases.
-        List<String> list = Arrays.asList(aliases);
+
         this.name = name;
         this.permission = parent.getPermission() + '.' + this.name;
+
+        List<String> list = Arrays.asList(aliases);
         this.aliases.addAll(list);
+    }
+
+    /**
+     * Constructs a new {@code SubCommand} for the specified parent command and name.
+     * <p>
+     * The {@code name} parameter can include aliases separated by a semicolon.
+     * The first element is taken as the primary name, and the subsequent elements are added as aliases.
+     * The permission node is automatically set as the parent command's wildcard permission
+     * concatenated with the sub-command's primary name.
+     * </p>
+     *
+     * @param parent the parent command (must not be {@code null}).
+     * @param name   the sub-command name, optionally including aliases separated by a semicolon.
+     * @throws NullPointerException if the parent is {@code null} or if the name is blank.
+     */
+    public SubCommand(Command parent, String name) {
+        this.parent = Objects.requireNonNull(parent, "Parent cannot be null");
+
+        if (StringUtils.isBlank(name))
+            throw new NullPointerException("Name is empty");
+
+        List<String> list = new ArrayList<>(Arrays.asList(name.split(";")));
+        this.name = list.get(0);
+        this.permission = parent.getPermission() + '.' + this.name;
+        if (list.size() == 1) return;
+
+        for (int i = 1; i < list.size(); i++) aliases.add(list.get(i));
     }
 
     /**

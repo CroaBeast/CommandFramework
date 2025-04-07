@@ -216,6 +216,52 @@ public class MyPlugin extends JavaPlugin {
 
 ---
 
+## Maven / Gradle Installation
+
+To include Command Framework to the project, add the following repository and dependency to your build configuration. Replace `${version}` with the desired version tag.
+
+### Maven
+
+Add the repository and dependency to your `pom.xml`:
+
+```xml
+<repositories>
+    <repository>
+        <id>croabeast-repo</id>
+        <url>https://croabeast.github.io/repo/</url>
+    </repository>
+</repositories>
+
+<dependencies>
+    <dependency>
+        <groupId>me.croabeast</groupId>
+        <artifactId>CommandFramework</artifactId>
+        <version>${version}</version>
+        <scope>compile</scope>
+    </dependency>
+</dependencies>
+```
+
+### Gradle
+
+Add the repository and dependency to your `build.gradle`:
+
+```groovy
+repositories {
+    maven {
+        url "https://croabeast.github.io/repo/"
+    }
+}
+
+dependencies {
+    implementation "me.croabeast:CommandFramework:${version}"
+}
+```
+
+Replace `${version}` with the appropriate module version.
+
+---
+
 ## Conclusion
 
 **Command Framework** (the collection of classes in the `me.croabeast.command` package) is designed to streamline command development for Minecraft plugins, particularly on Paper forks where runtime registration can be challenging. Its modular design, support for sub-commands, dynamic tab completion, and robust permission checks make it an ideal choice for modern plugin development.
