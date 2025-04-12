@@ -1,3 +1,7 @@
+<p align="center">
+    <img alt="Discord" src="https://img.shields.io/discord/826555143398752286?style=for-the-badge&logo=discord&label=Support%20Server&color=635aea">
+</p>
+
 # Command Framework
 
 Command Framework is a flexible and extensible command framework designed for Bukkit/Spigot and especially Paper forks. It simplifies the process of creating, registering, and managing commands dynamically at runtime—a task that can be challenging due to inherent differences and limitations between Bukkit/Spigot and Paper.
@@ -268,5 +272,6 @@ Replace `${version}` with the appropriate module version.
 
 With Command Framework, you can build sophisticated command hierarchies, provide context-sensitive tab completions, and manage command registration and unregistration at runtime—ensuring compatibility and stability even on the latest Paper servers.
 
-Happy coding and enjoy building powerful commands with Command Framework!  
+Happy coding and enjoy building powerful commands with Command Framework!
+
 — *CroaBeast*  
