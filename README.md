@@ -1,5 +1,7 @@
 <p align="center">
-    <img alt="Discord" src="https://img.shields.io/discord/826555143398752286?style=for-the-badge&logo=discord&label=Support%20Server&color=635aea">
+    <a href="https://discord.com/invite/gzzhVqgy3b" alt="Support Server">
+        <img alt="Discord" src="https://img.shields.io/discord/826555143398752286?style=for-the-badge&logo=discord&label=Support%20Server&color=635aea">
+    </a>
 </p>
 
 # Command Framework
