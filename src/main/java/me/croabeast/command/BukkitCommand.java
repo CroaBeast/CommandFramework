@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import me.croabeast.common.Registrable;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -22,11 +23,11 @@ import java.util.*;
 /**
  * An abstract base class for commands that integrates with Bukkit’s command system.
  * <p>
- * {@code BukkitCommand} extends the default Bukkit {@code Command} class and implements
+ * {@code BukkitCommand} extends the default Bukkit {@code Command} class and implements both
  * {@link Command} and {@link DefaultPermissible} to provide a robust framework for creating,
  * registering, and unregistering commands at runtime. It supports sub-commands, dynamic permission
  * management, custom tab-completion, and error handling. This implementation is particularly designed
- * to work seamlessly on Paper forks, where dynamic command registration and unregistration can be challenging.
+ * to work seamlessly on Paper forks, where runtime command registration/unregistration can be challenging.
  * </p>
  * <p>
  * Key features include:
@@ -35,8 +36,8 @@ import java.util.*;
  *   <li>Managing sub-commands through an internal set.</li>
  *   <li>Customizable error handling via {@code executingError} and {@code completingError} predicates.</li>
  *   <li>Dynamic addition and removal of aliases.</li>
- *   <li>Robust permission management and integration with Bukkit's permission system.</li>
- *   <li>Support for runtime registration and unregistration with proper synchronization of command permissions.</li>
+ *   <li>Robust permission management integrated with Bukkit's permission system.</li>
+ *   <li>Support for runtime registration/unregistration with synchronization of command permissions.</li>
  * </ul>
  * </p>
  *
@@ -47,7 +48,7 @@ import java.util.*;
 public abstract class BukkitCommand extends org.bukkit.command.Command implements Command, DefaultPermissible {
 
     /**
-     * The unique key for this command.
+     * The unique key associated with this command.
      */
     @Getter
     private final NamespacedKey key;
@@ -59,18 +60,18 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     private final Plugin plugin;
 
     /**
-     * The set of sub-commands associated with this command.
+     * The set of sub-commands registered under this command.
      */
     final Set<BaseCommand> subCommands = new LinkedHashSet<>();
 
     /**
-     * Indicates whether this command is currently registered.
+     * Flag indicating whether this command is currently registered.
      */
     @Getter
     private boolean registered = false;
 
     /**
-     * The executable action that is performed when the command is executed.
+     * The executable action performed when this command is executed.
      */
     private Executable executable = null;
 
@@ -86,15 +87,16 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     SenderPredicate<Throwable> executingError, completingError;
 
     /**
-     * An internal holder for a previously loaded command that was overridden.
+     * Holds a reference to a previously loaded command that was overridden.
      */
     @Getter(AccessLevel.NONE)
     private Entry loadedCommand;
 
     /**
-     * Predicate to handle wrong argument cases during command execution.
+     * Predicate to handle cases when wrong arguments are passed to the command.
      * <p>
-     * It is used to determine whether a provided argument is incorrect, triggering a fallback behavior.
+     * This predicate is used to determine whether a provided argument is incorrect,
+     * thereby triggering a fallback behavior.
      * </p>
      */
     @Getter(AccessLevel.NONE)
@@ -102,18 +104,18 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     SenderPredicate<String> wrongArgumentAction;
 
     /**
-     * Private helper class to store a reference to a previously loaded command.
+     * Private helper class for storing a reference to a previously overridden command.
      */
-    private static class Entry {
+    private static class Entry implements Registrable {
 
         private final org.bukkit.command.Command command;
         private final Plugin plugin;
         private final String fallbackPrefix;
 
         /**
-         * Constructs an Entry for a given command.
+         * Constructs an {@code Entry} for the specified command.
          *
-         * @param command the command to store.
+         * @param command the command to store; must not be {@code null}
          */
         private Entry(org.bukkit.command.@NotNull Command command) {
             this.command = command;
@@ -125,6 +127,7 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
                 return;
             }
 
+            // If no plugin is associated, derive a fallback prefix from known command names.
             Set<String> names = new HashSet<>();
             knownCommands().forEach((k, v) -> {
                 if (command.equals(v)) names.add(k);
@@ -139,26 +142,35 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
         /**
          * Converts the plugin's name to lower case.
          *
-         * @param plugin the plugin.
-         * @return the plugin name in lower case.
+         * @param plugin the plugin instance
+         * @return the lower-case plugin name
          */
         static String pluginName(Plugin plugin) {
             return plugin.getName().toLowerCase(Locale.ENGLISH);
         }
 
+        @Override
+        public boolean isRegistered() {
+            return knownCommands().containsValue(command);
+        }
+
         /**
          * Registers the stored command with the command map using the fallback prefix.
+         *
+         * @return {@code true} if the registration was successful
          */
-        void register() {
-            getMap().register(fallbackPrefix, command);
+        public boolean register() {
+            return getMap().register(fallbackPrefix, command);
         }
 
         /**
          * Unregisters the stored command from the command map.
+         *
+         * @return {@code true} if the command was successfully unregistered
          */
-        void unregister() {
+        public boolean unregister() {
             knownCommands().values().removeIf(c -> c.equals(command));
-            command.unregister(getMap());
+            return command.unregister(getMap());
         }
 
         @Override
@@ -170,11 +182,11 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     /**
      * Constructs a new {@code BukkitCommand} with the specified plugin, name, and permission.
      * <p>
-     * Generates a unique {@link NamespacedKey} and sets up the default permission along with error handling
-     * for execution and tab-completion.
+     * This constructor generates a unique {@link NamespacedKey} and sets the default permission
+     * as provided. It also initializes error handling predicates for command execution and tab-completion.
      * </p>
      *
-     * @param plugin     the plugin that owns this command (must not be {@code null}).
+     * @param plugin     the plugin that owns this command; must not be {@code null}.
      * @param name       the name of the command.
      * @param permission the permission node for this command.
      */
@@ -197,13 +209,15 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
             return true;
         };
 
+        // Default wrong argument action simply returns true
         wrongArgumentAction = (s, a) -> true;
     }
 
     /**
      * Constructs a new {@code BukkitCommand} with the specified plugin and command name.
      * <p>
-     * The permission node is generated by concatenating the plugin's name (in lower case) with the command name.
+     * The permission node is generated by concatenating the plugin's name (in lower-case)
+     * with the command name (e.g., "pluginname.commandname").
      * </p>
      *
      * @param plugin the plugin that owns this command.
@@ -214,7 +228,7 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     }
 
     /**
-     * Determines if the provided argument triggers the wrong argument action.
+     * Determines if the provided argument triggers the wrong-argument action.
      *
      * @param sender the command sender.
      * @param arg    the argument to test.
@@ -249,7 +263,8 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     /**
      * Adds additional aliases to this command.
      * <p>
-     * New aliases are appended to the current list of aliases, ensuring that they do not duplicate the primary name.
+     * New aliases are appended to the current list of aliases,
+     * ensuring that the primary name is not duplicated.
      * </p>
      *
      * @param aliases the aliases to add.
@@ -284,9 +299,9 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     /**
      * Executes this command.
      * <p>
-     * If sub-commands are present and the first argument matches one, execution is delegated to the corresponding
-     * sub-command. Otherwise, this command's executable action is invoked.
-     * Any exceptions during execution are handled by the executingError predicate.
+     * If sub-commands exist and the first argument matches one, execution is delegated to the corresponding
+     * sub-command. Otherwise, the command's own executable action is invoked.
+     * Any exceptions during execution are handled via the {@code executingError} predicate.
      * </p>
      *
      * @param sender the command sender.
@@ -301,6 +316,7 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
             BaseCommand sub = getSubCommand(args[0]);
             if (sub == null)
                 return wrongArgumentAction.test(sender, args[0]);
+
             int last = args.length - 1;
             if (sub.isPermitted(sender)) {
                 final String[] newArgs = new String[last];
@@ -325,14 +341,15 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     /**
      * Provides tab completion suggestions for this command.
      * <p>
-     * Attempts to generate completions using the custom completion builder; if an error occurs,
-     * falls back to the superclass' tabComplete method.
+     * If a custom completion builder is defined, it is used to generate completions;
+     * otherwise, the superclass' tab completion is used as a fallback. Any exceptions encountered
+     * are handled by the {@code completingError} predicate.
      * </p>
      *
      * @param sender the command sender.
      * @param alias  the alias of the command.
      * @param args   the command arguments.
-     * @return a list of tab completion suggestion strings.
+     * @return a list of suggestion strings for tab completion.
      */
     @NotNull
     public List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, String[] args) {
@@ -363,14 +380,14 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     /**
      * Sets the executable action for this command.
      *
-     * @param executable the executable action.
+     * @param executable the executable action to assign.
      */
     public void setExecutable(Executable executable) {
         this.executable = executable;
     }
 
     /**
-     * Sets the executable action based on a given {@link CommandPredicate}.
+     * Sets the executable action based on a provided {@link CommandPredicate}.
      *
      * @param predicate the command predicate used to generate the executable action.
      */
@@ -381,14 +398,14 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     /**
      * Sets the executable action to a constant boolean value.
      *
-     * @param value the boolean value.
+     * @param value the boolean value representing the command outcome.
      */
     public void setExecutable(boolean value) {
         this.executable = Executable.from(value);
     }
 
     /**
-     * Retrieves an unmodifiable set of sub-commands for this command.
+     * Retrieves an unmodifiable set of all sub-commands registered under this command.
      *
      * @return a set of sub-commands.
      */
@@ -417,7 +434,7 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     /**
      * Adds a permission to the Bukkit permission system.
      * <p>
-     * Creates a new {@link Permission} using the given permission node and registers it with the plugin manager.
+     * Creates and registers a new {@link Permission} using the specified permission node.
      * </p>
      *
      * @param perm the permission node.
@@ -433,7 +450,7 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     /**
      * Removes a permission from the Bukkit permission system.
      *
-     * @param perm the permission node.
+     * @param perm the permission node to remove.
      */
     private static void removePerm(String perm) {
         if (!StringUtils.isBlank(perm))
@@ -441,13 +458,14 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     }
 
     /**
-     * Loads or unloads command permissions based on the provided state.
+     * Loads or unloads command permissions from the Bukkit permission system based on the given flag.
      * <p>
-     * When loading, this method removes the current command's permission and those of its sub-commands
-     * (if any) from the Bukkit permission system. When unloading, it adds them back.
+     * When {@code loaded} is {@code true}, the current command's permission and its sub-commands' permissions
+     * (as well as its wildcard permission) are removed from the system. When {@code loaded} is {@code false},
+     * they are re-added.
      * </p>
      *
-     * @param loaded if {@code true}, permissions are removed; if {@code false}, they are added.
+     * @param loaded if {@code true}, permissions are removed; if {@code false}, they are added back.
      */
     private void loadCommandPermissions(boolean loaded) {
         if (loaded) {
@@ -465,7 +483,7 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     }
 
     /**
-     * Retrieves the Bukkit {@link SimpleCommandMap} from the Craft wrapper.
+     * Retrieves the Bukkit {@link SimpleCommandMap} using reflection from the server.
      *
      * @return the {@link SimpleCommandMap} instance.
      */
@@ -480,7 +498,7 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     }
 
     /**
-     * Retrieves the known commands from the Bukkit command system.
+     * Retrieves a map of known commands from the Bukkit command system using reflection.
      *
      * @return a map of command names to {@link org.bukkit.command.Command} instances.
      */
@@ -495,17 +513,31 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
         return (Map<String, org.bukkit.command.Command>) field.get(map);
     }
 
+    /**
+     * Synchronizes commands within the Bukkit server.
+     * <p>
+     * This method calls the internal server method "syncCommands" via reflection to ensure that
+     * the command system is updated after registration or unregistration.
+     * </p>
+     */
     @SneakyThrows
-    static void syncCommands() {
-        Server server = Bukkit.getServer();
-        Method method = server
-                .getClass()
-                .getDeclaredMethod("syncCommands");
-
+    public static void syncCommands() {
+        final Server server = Bukkit.getServer();
+        Method method = server.getClass().getDeclaredMethod("syncCommands");
         method.setAccessible(true);
         method.invoke(server);
     }
 
+    /**
+     * Registers this command with the Bukkit command map.
+     * <p>
+     * If a previous command is overridden, it is unregistered and stored for later re-registration.
+     * Command permissions are managed accordingly. Optionally, the command system is synchronized after registration.
+     * </p>
+     *
+     * @param sync if {@code true}, the command system is synchronized after registration.
+     * @return {@code true} if the command was successfully registered; {@code false} otherwise.
+     */
     public boolean register(boolean sync) {
         if (registered || !isEnabled()) return false;
 
@@ -521,12 +553,7 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     }
 
     /**
-     * Registers this command with the Bukkit command map.
-     * <p>
-     * If the command is set to override an existing command, the existing command is unregistered and stored
-     * for later re-registration upon unregistration of this command. Permissions for this command and its sub-commands
-     * are also managed accordingly.
-     * </p>
+     * Registers this command with the Bukkit command map and synchronizes the command system.
      *
      * @return {@code true} if the command was successfully registered; {@code false} otherwise.
      */
@@ -535,6 +562,16 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
         return register(true);
     }
 
+    /**
+     * Unregisters this command from the Bukkit command map.
+     * <p>
+     * If a previously overridden command exists, it is re-registered after this command is unregistered.
+     * The command system is synchronized after unregistration.
+     * </p>
+     *
+     * @param sync if {@code true}, the command system is synchronized after unregistration.
+     * @return {@code true} if the command was successfully unregistered; {@code false} otherwise.
+     */
     @SuppressWarnings("all")
     public boolean unregister(boolean sync) {
         if (!registered || isEnabled()) return false;
@@ -557,10 +594,7 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     }
 
     /**
-     * Unregisters this command from the Bukkit command map.
-     * <p>
-     * If a previous command was overridden, it is re-registered after this command is unregistered.
-     * </p>
+     * Unregisters this command from the Bukkit command map and synchronizes the command system.
      *
      * @return {@code true} if the command was successfully unregistered; {@code false} otherwise.
      */
@@ -570,7 +604,7 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     }
 
     /**
-     * Checks if this command is equal to another object based on its unique key.
+     * Checks whether this command is equal to another object based on its unique key.
      *
      * @param o the object to compare.
      * @return {@code true} if the other object is a {@code BukkitCommand} with the same key; {@code false} otherwise.
@@ -584,9 +618,9 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     }
 
     /**
-     * Computes the hash code for this command based on its unique key.
+     * Computes a hash code for this command based on its unique key.
      *
-     * @return the hash code of the command.
+     * @return the hash code.
      */
     @Override
     public int hashCode() {

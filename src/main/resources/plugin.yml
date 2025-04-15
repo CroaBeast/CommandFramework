@@ -1,0 +1,7 @@
+main: me.croabeast.command.plugin.CFPlugin
+
+name: CommandFramework
+version: '${project.version}'
+prefix: CF
+authors: [ CroaBeast ]
+api-version: 1.13
