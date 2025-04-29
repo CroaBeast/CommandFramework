@@ -95,7 +95,6 @@ Create a custom command by extending `BukkitCommand`:
 package com.example.myplugin.command;
 
 import me.croabeast.command.BukkitCommand;
-import me.croabeast.command.BaseCommand;
 import me.croabeast.command.SubCommand;
 import me.croabeast.command.TabBuilder;
 import me.croabeast.command.DefaultPermissible;
@@ -105,54 +104,54 @@ import org.jetbrains.annotations.NotNull;
 
 public class GreetCommand extends BukkitCommand implements DefaultPermissible {
 
-    /**
-     * Constructs the GreetCommand with a reference to the owning plugin.
-     *
-     * @param plugin the plugin instance.
-     */
-    public GreetCommand(Plugin plugin) {
-        super(plugin, "greet");
+  /**
+   * Constructs the GreetCommand with a reference to the owning plugin.
+   *
+   * @param plugin the plugin instance.
+   */
+  public GreetCommand(Plugin plugin) {
+    super(plugin, "greet");
 
-        // Set up the main command executable
-        setExecutable((CommandSender sender, String[] args) -> {
-            sender.sendMessage("Hello, " + sender.getName() + "!");
-            return Executable.State.TRUE;
-        });
+    // Set up the main command executable
+    setPredicate((CommandSender sender, String[] args) -> {
+      sender.sendMessage("Hello, " + sender.getName() + "!");
+      return Executable.State.TRUE;
+    });
 
-        // Register a sub-command "reload" with an alias "r"
-        SubCommand reloadSub = new SubCommand(this, "reload;r");
-        reloadSub.setPredicate((sender, args) -> {
-            // Reload logic here
-            sender.sendMessage("GreetCommand configuration reloaded.");
-            return true;
-        });
-        registerSubCommand(reloadSub);
+    // Register a sub-command "reload" with an alias "r"
+    SubCommand reloadSub = new SubCommand(this, "reload;r");
+    reloadSub.setPredicate((sender, args) -> {
+      // Reload logic here
+      sender.sendMessage("GreetCommand configuration reloaded.");
+      return true;
+    });
+    registerSubCommand(reloadSub);
+  }
+
+  /**
+   * Provides custom tab completion for the command.
+   *
+   * @param sender the command sender.
+   * @param alias  the command alias used.
+   * @param args   the arguments passed to the command.
+   * @return a list of suggestions.
+   */
+  @NotNull
+  @Override
+  public java.util.List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, String[] args) {
+    // Create a simple TabBuilder for suggestions
+    TabBuilder builder = new TabBuilder();
+    if (args.length == 1) {
+      // Suggest "hello" and "hi" when no sub-command is specified
+      builder.addArgument(1, "hello");
+      builder.addArgument(1, "hi");
+    } else if (args.length > 1) {
+      // Optionally, provide additional suggestions for further arguments
+      builder.addArgument(args.length, "option1");
+      builder.addArgument(args.length, "option2");
     }
-
-    /**
-     * Provides custom tab completion for the command.
-     *
-     * @param sender the command sender.
-     * @param alias  the command alias used.
-     * @param args   the arguments passed to the command.
-     * @return a list of suggestions.
-     */
-    @NotNull
-    @Override
-    public java.util.List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, String[] args) {
-        // Create a simple TabBuilder for suggestions
-        TabBuilder builder = new TabBuilder();
-        if (args.length == 1) {
-            // Suggest "hello" and "hi" when no sub-command is specified
-            builder.addArgument(1, "hello");
-            builder.addArgument(1, "hi");
-        } else if (args.length > 1) {
-            // Optionally, provide additional suggestions for further arguments
-            builder.addArgument(args.length, "option1");
-            builder.addArgument(args.length, "option2");
-        }
-        return builder.build(sender, args);
-    }
+    return builder.build(sender, args);
+  }
 }
 ```
 

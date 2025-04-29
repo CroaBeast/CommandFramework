@@ -73,7 +73,8 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     /**
      * The executable action performed when this command is executed.
      */
-    private CommandPredicate executable = null;
+    @Setter
+    private CommandPredicate predicate = null;
 
     /**
      * Predicate for handling errors during command execution.
@@ -374,25 +375,7 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
      */
     @NotNull
     public CommandPredicate getPredicate() {
-        return Objects.requireNonNull(executable, "Executable predicate is not set");
-    }
-
-    /**
-     * Sets the executable predicate based on a provided {@link CommandPredicate}.
-     *
-     * @param predicate the command predicate used to generate the executable predicate.
-     */
-    public void setExecutable(CommandPredicate predicate) {
-        this.executable = predicate;
-    }
-
-    /**
-     * Sets the executable predicate to a constant boolean value.
-     *
-     * @param value the boolean value representing the command outcome.
-     */
-    public void setExecutable(boolean value) {
-        this.executable = (sender, strings) -> value;
+        return Objects.requireNonNull(predicate, "Executable predicate is not set");
     }
 
     /**
