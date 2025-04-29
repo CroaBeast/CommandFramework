@@ -73,7 +73,7 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     /**
      * The executable action performed when this command is executed.
      */
-    private Executable executable = null;
+    private CommandPredicate executable = null;
 
     /**
      * Predicate for handling errors during command execution.
@@ -323,7 +323,7 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
                 if (args.length > 1)
                     System.arraycopy(args, 1, newArgs, 0, last);
                 try {
-                    success = sub.getExecutable().executeAction(sender, newArgs).asBoolean();
+                    success = sub.getPredicate().test(sender, newArgs);
                 } catch (Throwable e) {
                     success = executingError.test(sender, e);
                 }
@@ -331,7 +331,7 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
             }
         }
         try {
-            success = getExecutable().executeAction(sender, args).asBoolean();
+            success = getPredicate().test(sender, args);
         } catch (Throwable e) {
             success = executingError.test(sender, e);
         }
@@ -367,41 +367,32 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
     }
 
     /**
-     * Retrieves the executable action associated with this command.
+     * Retrieves the executable predicate associated with this command.
      *
-     * @return the {@link Executable} representing the command's action.
-     * @throws NullPointerException if the executable action is not set.
+     * @return the {@link CommandPredicate} representing the command's action.
+     * @throws NullPointerException if the executable predicate is not set.
      */
     @NotNull
-    public Executable getExecutable() {
-        return Objects.requireNonNull(executable, "Executable action is not set");
+    public CommandPredicate getPredicate() {
+        return Objects.requireNonNull(executable, "Executable predicate is not set");
     }
 
     /**
-     * Sets the executable action for this command.
+     * Sets the executable predicate based on a provided {@link CommandPredicate}.
      *
-     * @param executable the executable action to assign.
-     */
-    public void setExecutable(Executable executable) {
-        this.executable = executable;
-    }
-
-    /**
-     * Sets the executable action based on a provided {@link CommandPredicate}.
-     *
-     * @param predicate the command predicate used to generate the executable action.
+     * @param predicate the command predicate used to generate the executable predicate.
      */
     public void setExecutable(CommandPredicate predicate) {
-        this.executable = Executable.from(predicate);
+        this.executable = predicate;
     }
 
     /**
-     * Sets the executable action to a constant boolean value.
+     * Sets the executable predicate to a constant boolean value.
      *
      * @param value the boolean value representing the command outcome.
      */
     public void setExecutable(boolean value) {
-        this.executable = Executable.from(value);
+        this.executable = (sender, strings) -> value;
     }
 
     /**
@@ -539,7 +530,7 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
      * @return {@code true} if the command was successfully registered; {@code false} otherwise.
      */
     public boolean register(boolean sync) {
-        if (registered || !isEnabled()) return false;
+        if (registered) return false;
 
         org.bukkit.command.Command c = knownCommands().get(getName());
         if (isOverriding() && c != null)
@@ -574,7 +565,7 @@ public abstract class BukkitCommand extends org.bukkit.command.Command implement
      */
     @SuppressWarnings("all")
     public boolean unregister(boolean sync) {
-        if (!registered || isEnabled()) return false;
+        if (!registered) return false;
 
         org.bukkit.command.Command c = knownCommands().get(getName());
         if (!Objects.equals(c, this)) return false;

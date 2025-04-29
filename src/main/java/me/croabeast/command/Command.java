@@ -15,7 +15,7 @@ import java.util.Set;
  * <p>
  * A {@code Command} extends multiple interfaces to provide a comprehensive structure for commands:
  * <ul>
- *   <li>{@link BaseCommand} for basic command properties (name, aliases, and executable action).</li>
+ *   <li>{@link BaseCommand} for basic command properties (name, aliases, and executable predicate).</li>
  *   <li>{@link Completable} for generating tab-completion suggestions.</li>
  *   <li>{@link PluginIdentifiableCommand} and {@link Keyed} for associating the command with a plugin.</li>
  *   <li>{@link Registrable} for handling command registration.</li>
@@ -42,10 +42,10 @@ import java.util.Set;
  *     }
  *
  *     {@literal @}Override
- *     public Executable getExecutable() {
+ *     public CommandPredicate getPredicate() {
  *         return (sender, args) -&gt; {
  *             // command logic
- *             return Executable.State.TRUE;
+ *             return true;
  *         };
  *     }
  *

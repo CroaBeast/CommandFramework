@@ -15,7 +15,7 @@ import java.util.Objects;
  * Represents a sub-command that is part of a parent command.
  * <p>
  * A {@code SubCommand} implements {@link BaseCommand} and encapsulates the name, permission node,
- * aliases, and executable action for a sub-command. Its permission node is automatically constructed by
+ * aliases, and executable predicate for a sub-command. Its permission node is automatically constructed by
  * appending the sub-command's name to its parent command's permission, and aliases can be specified by
  * separating them with a semicolon in the provided name string.
  * </p>
@@ -24,16 +24,16 @@ import java.util.Objects;
  * <pre><code>
  * // Create a sub-command with aliases "alt1" and "alt2":
  * SubCommand sub = new SubCommand(parentCommand, "mainName;alt1;alt2");
- * sub.setExecutable((sender, args) -&gt; {
+ * sub.setPredicate((sender, args) -&gt; {
  *     // Sub-command logic here.
- *     return Executable.State.TRUE;
+ *     return true;
  * });
  * </code></pre>
  * </p>
  *
  * @see BaseCommand
  * @see Command
- * @see Executable
+ * @see CommandPredicate
  */
 @Getter
 public class SubCommand implements BaseCommand {
@@ -66,7 +66,7 @@ public class SubCommand implements BaseCommand {
      * The executable action to be performed when the sub-command is invoked.
      */
     @Setter
-    private Executable executable = null;
+    private CommandPredicate predicate = null;
 
     /**
      * Constructs a new {@code SubCommand} for the specified parent command and name.
@@ -140,16 +140,16 @@ public class SubCommand implements BaseCommand {
     }
 
     /**
-     * Returns the executable action for this sub-command.
+     * Returns the executable predicate for this sub-command.
      * <p>
-     * If the executable action has not been set, a {@link NullPointerException} is thrown.
+     * If the executable predicate has not been set, a {@link NullPointerException} is thrown.
      * </p>
      *
-     * @return the {@link Executable} representing the action of this sub-command.
+     * @return the {@link CommandPredicate} representing the predicate of this sub-command.
      * @throws NullPointerException if the executable action is not set.
      */
     @NotNull
-    public Executable getExecutable() {
-        return Objects.requireNonNull(executable, "Executable action is not set");
+    public CommandPredicate getPredicate() {
+        return Objects.requireNonNull(predicate, "Executable predicate is not set");
     }
 }

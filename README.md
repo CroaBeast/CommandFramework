@@ -87,7 +87,7 @@ Paper forks of Bukkit/Spigot often break traditional command registration method
 
 ## Usage Examples
 
-### Example 1: Custom Command by Extending BukkitCommand
+### Example: Custom Command by Extending BukkitCommand
 
 Create a custom command by extending `BukkitCommand`:
 
@@ -96,15 +96,12 @@ package com.example.myplugin.command;
 
 import me.croabeast.command.BukkitCommand;
 import me.croabeast.command.BaseCommand;
-import me.croabeast.command.Executable;
 import me.croabeast.command.SubCommand;
 import me.croabeast.command.TabBuilder;
 import me.croabeast.command.DefaultPermissible;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Arrays;
 
 public class GreetCommand extends BukkitCommand implements DefaultPermissible {
 
@@ -115,7 +112,7 @@ public class GreetCommand extends BukkitCommand implements DefaultPermissible {
      */
     public GreetCommand(Plugin plugin) {
         super(plugin, "greet");
-        
+
         // Set up the main command executable
         setExecutable((CommandSender sender, String[] args) -> {
             sender.sendMessage("Hello, " + sender.getName() + "!");
@@ -124,10 +121,10 @@ public class GreetCommand extends BukkitCommand implements DefaultPermissible {
 
         // Register a sub-command "reload" with an alias "r"
         SubCommand reloadSub = new SubCommand(this, "reload;r");
-        reloadSub.setExecutable((sender, args) -> {
+        reloadSub.setPredicate((sender, args) -> {
             // Reload logic here
             sender.sendMessage("GreetCommand configuration reloaded.");
-            return Executable.State.TRUE;
+            return true;
         });
         registerSubCommand(reloadSub);
     }
@@ -179,43 +176,6 @@ public class MyPlugin extends JavaPlugin {
         
         // To unregister the command later, call:
         // greetCommand.unregister();
-    }
-}
-```
-
-### Example 2: Creating a Command with CommandBuilder
-
-Alternatively, use the fluent API provided by `CommandBuilder`:
-
-```java
-package com.example.myplugin;
-
-import com.example.myplugin.command.CommandBuilder;
-import com.example.myplugin.command.Executable;
-import com.example.myplugin.command.TabBuilder;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.Arrays;
-
-public class MyPlugin extends JavaPlugin {
-
-    @Override
-    public void onEnable() {
-        // Create a command "example" using CommandBuilder
-        CommandBuilder builder = CommandBuilder.from(this, "example")
-            .setOverriding(true)
-            .setCompletions((sender, args) -> Arrays.asList("optionA", "optionB", "optionC"))
-            .setCompletionBuilder(new TabBuilder().addArgument(1, "optionA"))
-            .apply(cmd -> cmd.setExecutable((sender, args) -> {
-                sender.sendMessage("Example command executed with arguments: " + String.join(" ", args));
-                return Executable.State.TRUE;
-            }));
-
-        // Register the command at runtime (works seamlessly on Paper)
-        builder.register();
-
-        // To unregister later:
-        // builder.unregister();
     }
 }
 ```

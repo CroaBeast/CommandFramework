@@ -11,7 +11,7 @@ import java.util.List;
  * <ul>
  *   <li>The command name, as returned by {@link #getName()}.</li>
  *   <li>A list of alternative names (aliases) via {@link #getAliases()}.</li>
- *   <li>An executable action defined by {@link Executable}, which is run when the command is invoked.</li>
+ *   <li>An executable predicate defined by {@link CommandPredicate}, which is run when the command is invoked.</li>
  * </ul>
  * </p>
  * <p>
@@ -34,10 +34,10 @@ import java.util.List;
  *     }
  *
  *     {@literal @}Override
- *     public Executable getExecutable() {
+ *     public CommandPredicate getPredicate() {
  *         return (sender, args) -&gt; {
  *             // command execution logic
- *             return Executable.State.TRUE;
+ *             return true;
  *         };
  *     }
  *
@@ -48,7 +48,7 @@ import java.util.List;
  * }</code></pre></p>
  *
  * @see Permissible
- * @see Executable
+ * @see CommandPredicate
  */
 public interface BaseCommand extends Permissible {
 
@@ -72,13 +72,13 @@ public interface BaseCommand extends Permissible {
     List<String> getAliases();
 
     /**
-     * Gets the executable action associated with this command.
+     * Gets the executable predicate associated with this command.
      * <p>
-     * The returned {@link Executable} defines the logic that is run when the command is invoked.
+     * The returned {@link CommandPredicate} defines the logic that is run when the command is invoked.
      * </p>
      *
-     * @return the {@link Executable} instance representing the command's behavior.
+     * @return the {@link CommandPredicate} instance representing the command's behavior.
      */
     @NotNull
-    Executable getExecutable();
+    CommandPredicate getPredicate();
 }
