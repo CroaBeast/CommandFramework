@@ -23,7 +23,7 @@ import java.util.*;
 /**
  * An abstract base class for commands that integrates with Bukkit’s command system.
  * <p>
- * {@code BukkitCommand} extends the default Bukkit {@code Command} class and implements both
+ * {@code BukkitCommand} extends the default {@code BukkitCommand} class and implements both
  * {@link Command} and {@link DefaultPermissible} to provide a robust framework for creating,
  * registering, and unregistering commands at runtime. It supports sub-commands, dynamic permission
  * management, custom tab-completion, and error handling. This implementation is particularly designed
@@ -45,7 +45,7 @@ import java.util.*;
  * @see DefaultPermissible
  * @see PluginIdentifiableCommand
  */
-public abstract class BukkitCommand extends org.bukkit.command.Command implements Command, DefaultPermissible {
+public abstract class BukkitCommand extends org.bukkit.command.defaults.BukkitCommand implements Command, DefaultPermissible {
 
     /**
      * The unique key associated with this command.
