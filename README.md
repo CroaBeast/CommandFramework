@@ -11,7 +11,9 @@ Easily create, register, and manage commands at runtime—even on Paper, where t
 Easily create, register, and manage commands at runtime—even on Paper, where this is usually difficult.
 
 ---
+
 ## ✨ Features
+
 ---
 - 🔄 **Dynamic Command Registration:** Register/unregister commands at runtime, even on Paper.
 - 🌳 **Sub-Commands:** Build command hierarchies with permissions and aliases.
