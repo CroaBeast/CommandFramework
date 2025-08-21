@@ -4,92 +4,26 @@
     </a>
 </p>
 
-# Command Framework
+# ⚡ Command Framework
 
-Command Framework is a flexible and extensible command framework designed for Bukkit/Spigot and especially Paper forks. It simplifies the process of creating, registering, and managing commands dynamically at runtime—a task that can be challenging due to inherent differences and limitations between Bukkit/Spigot and Paper.
-
----
-
-## Overview
-
-The `me.croabeast.command` package offers a modular command system that provides:
-
-- **Robust Registration/Unregistration:**  
-  Seamlessly register and unregister commands at runtime even on Paper servers, where many traditional Bukkit/Spigot implementations can break. Command Framework addresses the runtime registration challenges posed by Paper.
-
-- **Sub-Commands Support:**  
-  Easily implement command hierarchies with sub-commands. Each sub-command automatically derives its permission node from its parent and can be configured with aliases.
-
-- **Dynamic Tab Completion:**  
-  Build context-sensitive tab completions with the included `TabBuilder` class. You can define both static and dynamic suggestions, and even use predicates and functions to tailor completions based on the command sender or input.
-
-- **Permission Handling:**  
-  Leverage the `Permissible` and `DefaultPermissible` interfaces for robust permission checking. The framework supports wildcard permissions and integrates neatly with the Bukkit permission system.
-
-- **Fluent Command Creation:**  
-  Use the `CommandBuilder` class for a fluent API to quickly create and configure commands, setting properties like overriding behavior, error handling, and custom tab completion strategies.
-
-- **Integration with Bukkit/Spigot/Paper:**  
-  Built on top of Bukkit’s command system, Command Framework seamlessly integrates with the server’s command map and permission system. It is particularly tuned for Paper servers where runtime command management is notoriously challenging.
+A modern, flexible command framework for Bukkit/Spigot and especially Paper Minecraft servers.  
+Easily create, register, and manage commands at runtime—even on Paper, where this is usually difficult.
 
 ---
 
-## Key Components
+## ✨ Features
 
-### Permissible & DefaultPermissible
-- **Purpose:** Define basic permission requirements for commands.
-- **Usage:** Implement these interfaces to ensure that only authorized users execute commands.
-
-### Executable
-- **Purpose:** Represent the command action that is executed.
-- **Usage:** Return a result using a {@code State} enum to indicate success or failure.
-
-### BaseCommand
-- **Purpose:** Establish the core structure of commands, including their names, aliases, and executable actions.
-- **Usage:** Use these interfaces as the foundation for building more complex commands with sub-commands and permissions.
-
-### Command
-- **Purpose:** Extend BaseCommand and Completable to provide a complete command interface with tab completion support.
-- **Usage:** Manage sub-commands and wildcard permissions automatically.
-
-### SubCommand
-- **Purpose:** Create sub-commands that are automatically linked to a parent command.
-- **Usage:** Easily extend commands with additional functionalities (e.g., a "reload" sub-command) while inheriting permission settings.
-
-### TabBuilder
-- **Purpose:** Build and manage tab-completion suggestions.
-- **Usage:** Configure suggestions for specific command arguments with flexible filtering and predicate-based selection.
-
-### BukkitCommand
-- **Purpose:** An abstract base class that integrates with Bukkit’s command system.
-- **Usage:** Extend this class for full control over command execution, including runtime registration/unregistration—a common challenge on Paper servers.
-
-### CommandBuilder
-- **Purpose:** Provide a fluent API for constructing commands.
-- **Usage:** Use CommandBuilder to quickly create commands with tab completions and error handling, perfect for Paper forks with dynamic runtime command management.
+- 🔄 **Dynamic Command Registration:** Register/unregister commands at runtime, even on Paper.
+- 🌳 **Sub-Commands:** Build command hierarchies with permissions and aliases.
+- ✨ **Tab Completion:** Context-aware suggestions with `TabBuilder`.
+- 🔐 **Permissions:** Wildcard and custom permission checks.
+- 🧑‍💻 **Fluent API:** Quickly build commands with `CommandBuilder`.
 
 ---
 
-## Why Command Framework Works on Paper Forks
+## 🛠️ Quick Example
 
-Paper forks of Bukkit/Spigot often break traditional command registration methods, especially when attempting dynamic registration and unregistration at runtime. Command Framework was built with these challenges in mind. It:
-
-- **Supports Runtime Changes:**  
-  Enables commands to be registered and unregistered at runtime without issues on Paper.
-
-- **Handles Compatibility Issues:**  
-  Includes workarounds and specialized implementations (e.g., in `BukkitCommand` and `CommandBuilder`) that account for Paper’s modifications to the command system.
-
-- **Ensures Stability:**  
-  Provides robust error handling and permission management even when underlying APIs change between Bukkit/Spigot and Paper.
-
----
-
-## Usage Examples
-
-### Example: Custom Command by Extending BukkitCommand
-
-Create a custom command by extending `BukkitCommand`:
+Create and register a simple command with a sub-command:
 
 ```java
 package com.example.myplugin.command;
@@ -125,7 +59,7 @@ public class GreetCommand extends BukkitCommand implements DefaultPermissible {
       sender.sendMessage("GreetCommand configuration reloaded.");
       return true;
     });
-    registerSubCommand(reloadSub);
+    addSubCommand(reloadSub);
   }
 
   /**
@@ -155,7 +89,7 @@ public class GreetCommand extends BukkitCommand implements DefaultPermissible {
 }
 ```
 
-#### Registering the Command
+#### 📝 Registering the Command
 
 In your plugin’s main class (extending `JavaPlugin`), register the command:
 
@@ -181,14 +115,9 @@ public class MyPlugin extends JavaPlugin {
 
 ---
 
-## Maven / Gradle Installation
+## ⚙️ Installation
 
-To include Command Framework to the project, add the following repository and dependency to your build configuration. Replace `${version}` with the desired version tag.
-
-### Maven
-
-Add the repository and dependency to your `pom.xml`:
-
+**Maven:**
 ```xml
 <repositories>
     <repository>
@@ -207,10 +136,7 @@ Add the repository and dependency to your `pom.xml`:
 </dependencies>
 ```
 
-### Gradle
-
-Add the repository and dependency to your `build.gradle`:
-
+**Gradle:**
 ```groovy
 repositories {
     maven {
@@ -223,16 +149,29 @@ dependencies {
 }
 ```
 
-Replace `${version}` with the appropriate module version.
+Replace `${version}` with the latest version.
 
 ---
 
-## Conclusion
+## ❓ Why Use This?
 
-**Command Framework** (the collection of classes in the `me.croabeast.command` package) is designed to streamline command development for Minecraft plugins, particularly on Paper forks where runtime registration can be challenging. Its modular design, support for sub-commands, dynamic tab completion, and robust permission checks make it an ideal choice for modern plugin development.
+- Works reliably on Paper forks where other frameworks fail.
+- Makes complex command trees and tab completions easy.
+- Handles permissions and registration for you.
 
-With Command Framework, you can build sophisticated command hierarchies, provide context-sensitive tab completions, and manage command registration and unregistration at runtime—ensuring compatibility and stability even on the latest Paper servers.
+---
 
-Happy coding and enjoy building powerful commands with Command Framework!
+## 🚀 Get Started
 
-— *CroaBeast*  
+1. Add the dependency.
+2. Extend `BukkitCommand` or create your own command class.
+3. Register your command in your plugin's `onEnable()`.
+
+---
+
+## 🎉 Happy Coding!
+
+Build powerful, modern commands for your Minecraft plugin with ease!  
+Questions? Join our [Discord](https://discord.com/invite/gzzhVqgy3b) 💬
+
+— *CroaBeast*

@@ -29,16 +29,17 @@ import java.util.Set;
  * Example usage:
  * <pre><code>
  * public class MyCommand implements Command {
+ *
  *     private final Set<BaseCommand> subCommands = new HashSet<>();
  *
  *     {@literal @}Override
  *     public String getName() {
- *         return "mycommand";
+ *         return "my-command";
  *     }
  *
  *     {@literal @}Override
  *     public List&lt;String&gt; getAliases() {
- *         return Arrays.asList("mc", "mycmd");
+ *         return Arrays.asList("mc", "my-cmd");
  *     }
  *
  *     {@literal @}Override
@@ -67,6 +68,16 @@ import java.util.Set;
  *     {@literal @}Override
  *     public void registerSubCommand(@NotNull BaseCommand sub) {
  *         subCommands.add(sub);
+ *     }
+ *
+ *     {@literal @}Override
+ *     public void removeSubCommand(@NotNull String name) {
+ *         for (BaseCommand sub : subCommands) {
+ *             if (!sub.getName().equalsIgnoreCase(name)) return;
+ *
+ *             subCommands.remove(sub);
+ *             break;
+ *         }
  *     }
  *
  *     // Other methods from Completable, PluginIdentifiableCommand, Keyed, and Registrable...
@@ -103,11 +114,21 @@ public interface Command extends BaseCommand, Completable, PluginIdentifiableCom
     Set<BaseCommand> getSubCommands();
 
     /**
-     * Registers a sub-command under this command.
+     * Adds a sub-command under this command.
      *
      * @param sub the sub-command to register (must not be {@code null}).
      */
-    void registerSubCommand(@NotNull BaseCommand sub);
+    void addSubCommand(@NotNull BaseCommand sub);
+
+    /**
+     * Removes a sub-command by its name.
+     * <p>
+     * The method searches for a sub-command with the specified name and removes it if found.
+     * </p>
+     *
+     * @param name the name of the sub-command to remove (must not be {@code null} or empty).
+     */
+    void removeSubCommand(@NotNull String name);
 
     /**
      * Retrieves a sub-command matching the given name.

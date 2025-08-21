@@ -15,6 +15,7 @@ import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -62,7 +63,7 @@ public abstract class BukkitCommand extends org.bukkit.command.defaults.BukkitCo
     /**
      * The set of sub-commands registered under this command.
      */
-    final Set<BaseCommand> subCommands = new LinkedHashSet<>();
+    final Map<String, BaseCommand> subCommands = new LinkedHashMap<>();
 
     /**
      * Flag indicating whether this command is currently registered.
@@ -379,30 +380,82 @@ public abstract class BukkitCommand extends org.bukkit.command.defaults.BukkitCo
     }
 
     /**
+     * Retrieves a sub-command by its name or alias.
+     * <p>
+     * If no sub-command matches the provided name, {@code null} is returned.
+     * </p>
+     *
+     * @param name the name or alias of the sub-command.
+     * @return the sub-command if found; {@code null} otherwise.
+     */
+    @Nullable
+    public BaseCommand getSubCommand(String name) {
+        BaseCommand command = subCommands.get(name);
+        if (command != null) return command;
+
+        for (BaseCommand sub : subCommands.values())
+            if (sub.getAliases().contains(name))
+                return sub;
+
+        return null;
+    }
+
+    /**
      * Retrieves an unmodifiable set of all sub-commands registered under this command.
      *
      * @return a set of sub-commands.
      */
     @NotNull
     public Set<BaseCommand> getSubCommands() {
-        return Collections.unmodifiableSet(subCommands);
+        return Collections.unmodifiableSet(new HashSet<>(subCommands.values()));
     }
 
     /**
-     * Registers a sub-command with this command.
+     * Adds a sub-command to this command.
      * <p>
-     * If a sub-command with the same name already exists, the new sub-command is ignored.
+     * If the sub-command's name is already registered, it will not be added again.
      * </p>
      *
-     * @param sub the sub-command to register.
+     * @param sub the sub-command to add; must not be {@code null}.
+     * @throws NullPointerException if the sub-command is {@code null}.
      */
     @Override
-    public void registerSubCommand(@NotNull BaseCommand sub) {
+    public void addSubCommand(@NotNull BaseCommand sub) {
         Objects.requireNonNull(sub);
-        for (BaseCommand command : subCommands)
-            if (command.getName().equals(sub.getName()))
-                return;
-        subCommands.add(sub);
+
+        if (!subCommands.containsValue(sub))
+            subCommands.put(sub.getName(), sub);
+    }
+
+    /**
+     * Removes a sub-command by its name.
+     * <p>
+     * If the name is blank or null, an {@link IllegalArgumentException} is thrown.
+     * </p>
+     *
+     * @param name the name of the sub-command to remove; must not be {@code null} or empty.
+     * @throws IllegalArgumentException if the name is blank or null.
+     */
+    @Override
+    public void removeSubCommand(@NotNull String name) {
+        if (StringUtils.isBlank(name))
+            throw new IllegalArgumentException("Sub-command name cannot be null or empty");
+
+        subCommands.remove(name);
+    }
+
+    /**
+     * Registers a sub-command under this command.
+     * <p>
+     * This method is deprecated; use {@link #addSubCommand(BaseCommand)} instead.
+     * </p>
+     *
+     * @param sub the sub-command to register; must not be {@code null}.
+     * @throws NullPointerException if the sub-command is {@code null}.
+     */
+    @Deprecated
+    public void registerSubCommand(@NotNull BaseCommand sub) {
+        addSubCommand(sub);
     }
 
     /**
@@ -442,17 +495,22 @@ public abstract class BukkitCommand extends org.bukkit.command.defaults.BukkitCo
      * @param loaded if {@code true}, permissions are removed; if {@code false}, they are added back.
      */
     private void loadCommandPermissions(boolean loaded) {
+        Collection<BaseCommand> subs = subCommands.values();
+
         if (loaded) {
             removePerm(getPermission());
+
             if (!subCommands.isEmpty()) {
-                subCommands.forEach(s -> removePerm(s.getPermission()));
+                subs.forEach(s -> removePerm(s.getPermission()));
                 removePerm(getWildcardPermission());
             }
             return;
         }
+
         addPerm(getPermission());
         if (subCommands.isEmpty()) return;
-        subCommands.forEach(s -> addPerm(s.getPermission()));
+
+        subs.forEach(s -> addPerm(s.getPermission()));
         addPerm(getWildcardPermission());
     }
 
