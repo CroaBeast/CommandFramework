@@ -35,7 +35,7 @@ import java.util.Objects;
  * @see Command
  * @see CommandPredicate
  */
-@Getter
+@Getter @Setter
 public class SubCommand implements BaseCommand {
 
     /**
@@ -50,7 +50,7 @@ public class SubCommand implements BaseCommand {
      * and the sub-command's primary name.
      * </p>
      */
-    private final String permission;
+    private String permission;
 
     /**
      * The parent command to which this sub-command belongs.
@@ -65,7 +65,6 @@ public class SubCommand implements BaseCommand {
     /**
      * The executable action to be performed when the sub-command is invoked.
      */
-    @Setter
     private CommandPredicate predicate = null;
 
     /**
