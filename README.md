@@ -6,8 +6,7 @@
 
 # ⚡ Command Framework
 
-A modern, flexible command framework for Bukkit/Spigot and especially Paper Minecraft servers.
-Easily create, register, and manage commands at runtime—even on Paper, where this is usually difficult.
+A modern, flexible command framework for Bukkit/Spigot and especially Paper Minecraft servers.<br>
 Easily create, register, and manage commands at runtime—even on Paper, where this is usually difficult.
 
 ---
@@ -20,19 +19,17 @@ Easily create, register, and manage commands at runtime—even on Paper, where t
 - ✨ **Tab Completion:** Context-aware suggestions with `TabBuilder`.
 - 🔐 **Permissions:** Wildcard and custom permission checks.
 - 🧑‍💻 **Fluent API:** Quickly build commands with `CommandBuilder`.
-import me.croabeast.command.DefaultPermissible;
-import org.bukkit.command.CommandSender;
-import org.bukkit.plugin.Plugin;
+
 ## 🛠️ Quick Example
 
-Create and register a simple command with a sub-command:
-
+Create and register a simple command with a sub-command:<br>
 In your plugin’s main class (extending `JavaPlugin`), register the command:
 
 ```java
 package com.example.myplugin;
 
-import com.example.myplugin.command.GreetCommand;
+import me.croabeast.command.BukkitCommand;
+import me.croabeast.command.SubCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class MyPlugin extends JavaPlugin {
@@ -42,9 +39,28 @@ public class MyPlugin extends JavaPlugin {
         // Create an instance of GreetCommand and register it
         GreetCommand greetCommand = new GreetCommand(this);
         greetCommand.register();
-        
+
         // To unregister the command later, call:
         // greetCommand.unregister();
+    }
+
+    // Define the GreetCommand class
+    // It can be anywhere in your project
+    static class GreetCommand extends BukkitCommand {
+
+        GreetCommand(JavaPlugin plugin) {
+            super(plugin, "greet");
+            setDescription("Greet command");
+            setPermission("my-plugin.greet");
+
+            SubCommand sub = new SubCommand(plugin, "hello");
+            sub.setPermission("my-plugin.greet.hello");
+            sub.setPredicate((sender, args) -> {
+                sender.sendMessage("Hello, " + sender.getName() + "!");
+                return true;
+            });
+            addSubCommand(sub);
+        }
     }
 }
 ```
@@ -107,7 +123,7 @@ Replace `${version}` with the latest version.
 
 ## 🎉 Happy Coding!
 
-Build powerful, modern commands for your Minecraft plugin with ease!
+Build powerful, modern commands for your Minecraft plugin with ease!<br>
 Questions? Join our [Discord](https://discord.com/invite/gzzhVqgy3b) 💬
 
 — *CroaBeast*
