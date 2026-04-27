@@ -1,7 +1,6 @@
 package me.croabeast.command;
 
 import me.croabeast.common.Registrable;
-import org.bukkit.Keyed;
 import org.bukkit.command.PluginIdentifiableCommand;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
  * <ul>
  *   <li>{@link BaseCommand} for basic command properties (name, aliases, and executable predicate).</li>
  *   <li>{@link Completable} for generating tab-completion suggestions.</li>
- *   <li>{@link PluginIdentifiableCommand} and {@link Keyed} for associating the command with a plugin.</li>
+ *   <li>{@link PluginIdentifiableCommand} for associating the command with a plugin.</li>
  *   <li>{@link Registrable} for handling command registration.</li>
  * </ul>
  * </p>
@@ -73,17 +72,16 @@ import org.jetbrains.annotations.NotNull;
  *         }
  *     }
  *
- *     // Other methods from Completable, PluginIdentifiableCommand, Keyed, and Registrable...
+ *     // Other methods from Completable, PluginIdentifiableCommand, and Registrable...
  * }
  * }</pre></p>
  *
  * @see BaseCommand
  * @see Completable
  * @see PluginIdentifiableCommand
- * @see Keyed
  * @see Registrable
  */
-public interface Command extends BaseCommand, Completable, PluginIdentifiableCommand, Keyed, Registrable {
+public interface Command extends BaseCommand, Completable, PluginIdentifiableCommand, Registrable {
 
     /**
      * Checks if the command is currently enabled.

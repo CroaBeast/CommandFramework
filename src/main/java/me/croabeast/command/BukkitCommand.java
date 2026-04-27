@@ -7,7 +7,6 @@ import lombok.SneakyThrows;
 import me.croabeast.common.Registrable;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginIdentifiableCommand;
@@ -31,7 +30,7 @@ import java.util.*;
  * <p>
  * Key features include:
  * <ul>
- *   <li>Generating a unique {@link NamespacedKey} for each command.</li>
+ *   <li>Generating a unique runtime key for each command instance.</li>
  *   <li>Managing sub-commands through an internal set.</li>
  *   <li>Customizable error handling via {@code executingError} and {@code completingError} predicates.</li>
  *   <li>Dynamic addition and removal of aliases.</li>
@@ -50,7 +49,7 @@ public abstract class BukkitCommand extends org.bukkit.command.defaults.BukkitCo
     /**
      * The unique key associated with this command.
      */
-    private final NamespacedKey key;
+    private final String key;
 
     /**
      * The plugin that owns this command.
@@ -252,7 +251,7 @@ public abstract class BukkitCommand extends org.bukkit.command.defaults.BukkitCo
         super(name);
         this.plugin = Objects.requireNonNull(plugin);
 
-        key = new NamespacedKey(plugin, UUID.randomUUID().toString());
+        key = Entry.pluginName(plugin) + ':' + UUID.randomUUID();
         setPermission(permission);
 
         subCommandMap = SubCommandMap.create();
