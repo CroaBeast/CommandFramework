@@ -1,8 +1,8 @@
 plugins {
     kotlin("jvm") version "2.3.20-Beta1"
     id("java-library")
-    id("io.freefair.lombok") version "8.10"
-    id("com.gradleup.shadow") version "8.3.0"
+    id("io.freefair.lombok") version "9.4.0"
+    id("com.gradleup.shadow") version "9.4.1"
 }
 
 group = "me.croabeast"
